@@ -1,122 +1,98 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
+import { useState, useEffect } from 'react'
 import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [image, setImage] = useState(null)
+  const [loading, setLoading] = useState(true)
+
+  const loadRandomImage = () => {
+    setLoading(true)
+    const randomId = Math.floor(Math.random() * 10000)
+    const imageUrl = `https://picsum.photos/800/600?random=${randomId}`
+    
+    const img = new Image()
+    img.onload = () => {
+      setImage(imageUrl)
+      setLoading(false)
+    }
+    img.onerror = () => {
+      setImage(`https://source.unsplash.com/800x600/?abstract,ai,digital`)
+      setLoading(false)
+    }
+    img.src = imageUrl
+  }
+
+  useEffect(() => {
+    loadRandomImage()
+  }, [])
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
+    <div style={styles.container}>
+      <h1 style={styles.h1}>🎨 Random AI Generated Image</h1>
+      {loading && <div style={styles.loading}>Loading image...</div>}
+      {image && !loading && (
+        <div style={styles.imageWrapper}>
+          <img src={image} alt="Random AI Generated Image" style={styles.img} />
         </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+      )}
+      <br />
+      <button style={styles.btn} onClick={loadRandomImage}>
+        🔄 Get Another Image
+      </button>
+    </div>
   )
+}
+
+const styles = {
+  container: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    minHeight: '100vh',
+    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+    padding: '20px',
+  },
+  h1: {
+    color: 'white',
+    marginBottom: '30px',
+    fontSize: '2.5em',
+    textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)',
+  },
+  imageWrapper: {
+    position: 'relative',
+    display: 'inline-block',
+    cursor: 'pointer',
+    transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+    borderRadius: '15px',
+    overflow: 'hidden',
+    boxShadow: '0 10px 40px rgba(0, 0, 0, 0.3)',
+  },
+  img: {
+    display: 'block',
+    maxWidth: '100%',
+    height: 'auto',
+    borderRadius: '15px',
+    transition: 'filter 0.3s ease',
+  },
+  btn: {
+    marginTop: '30px',
+    padding: '12px 30px',
+    fontSize: '1em',
+    background: 'white',
+    color: '#667eea',
+    border: 'none',
+    borderRadius: '25px',
+    cursor: 'pointer',
+    fontWeight: 'bold',
+    transition: 'all 0.3s ease',
+    boxShadow: '0 5px 15px rgba(0, 0, 0, 0.2)',
+  },
+  loading: {
+    color: 'white',
+    fontSize: '1.2em',
+    marginBottom: '20px',
+  },
 }
 
 export default App
