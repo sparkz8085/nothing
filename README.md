@@ -1,6 +1,6 @@
 # nothing
 
-A random React + Vite app
+A random AI image generation APP with a special cause 
 
 ## Setup
 
