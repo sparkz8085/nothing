@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import './App.css'
 
 function App() {
+  // Random AI Image Generator App
   const [image, setImage] = useState(null)
   const [loading, setLoading] = useState(true)
 
