@@ -11,10 +11,26 @@ function App() {
     const newImages = []
     for (let i = 0; i < 20; i++) {
       const randomId = Math.floor(Math.random() * 10000)
-      newImages.push(`https://picsum.photos/300/200?random=${randomId}`)
+      const imageUrl = `https://picsum.photos/300/200?random=${randomId}`
+      const downloadLink = `${imageUrl}&download=true`
+      newImages.push({
+        url: imageUrl,
+        downloadLink: downloadLink,
+        id: `${randomId}-${i}-${Date.now()}`
+      })
     }
     setImages(newImages)
     setLoading(false)
+  }
+
+  const downloadImage = (image) => {
+    const link = document.createElement('a')
+    link.href = image.url
+    link.download = `random-image-${image.id}.jpg`
+    link.target = '_blank'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
   }
 
   useEffect(() => {
@@ -35,8 +51,14 @@ function App() {
       ) : (
         <div style={styles.gallery}>
           {images.map((image, index) => (
-            <div key={index} style={styles.imageWrapper}>
-              <img src={image} alt={`Random AI Generated ${index}`} style={styles.img} />
+            <div key={image.id} style={styles.imageWrapper}>
+              <img src={image.url} alt={`Random AI Generated ${index}`} style={styles.img} />
+              <button 
+                onClick={() => downloadImage(image)}
+                style={styles.downloadBtn}
+              >
+                ⬇️ Download
+              </button>
             </div>
           ))}
         </div>
@@ -91,6 +113,21 @@ const styles = {
     objectFit: 'cover',
     borderRadius: '15px',
     transition: 'filter 0.3s ease',
+  },
+  downloadBtn: {
+    position: 'absolute',
+    bottom: '10px',
+    right: '10px',
+    padding: '8px 12px',
+    fontSize: '0.9em',
+    background: 'white',
+    color: '#667eea',
+    border: 'none',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    fontWeight: 'bold',
+    transition: 'all 0.3s ease',
+    boxShadow: '0 5px 15px rgba(0, 0, 0, 0.3)',
   },
   btn: {
     padding: '12px 30px',
