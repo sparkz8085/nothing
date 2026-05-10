@@ -3,81 +3,96 @@ import './App.css'
 
 function App() {
   // Random AI Image Generator App
-  const [image, setImage] = useState(null)
+  const [images, setImages] = useState([])
   const [loading, setLoading] = useState(true)
 
-  const loadRandomImage = () => {
+  const generateImages = () => {
     setLoading(true)
-    const randomId = Math.floor(Math.random() * 10000)
-    const imageUrl = `https://picsum.photos/800/600?random=${randomId}`
-    
-    const img = new Image()
-    img.onload = () => {
-      setImage(imageUrl)
-      setLoading(false)
+    const newImages = []
+    for (let i = 0; i < 20; i++) {
+      const randomId = Math.floor(Math.random() * 10000)
+      newImages.push(`https://picsum.photos/300/200?random=${randomId}`)
     }
-    img.onerror = () => {
-      setImage(`https://source.unsplash.com/800x600/?abstract,ai,digital`)
-      setLoading(false)
-    }
-    img.src = imageUrl
+    setImages(newImages)
+    setLoading(false)
   }
 
   useEffect(() => {
-    loadRandomImage()
+    generateImages()
   }, [])
 
   return (
-    <div style={styles.container}>
-      <h1 style={styles.h1}>🎨 Random AI Generated Image</h1>
-      {loading && <div style={styles.loading}>Loading image...</div>}
-      {image && !loading && (
-        <div style={styles.imageWrapper}>
-          <img src={image} alt="Random AI Generated Image" style={styles.img} />
+    <div style={styles.pageContainer}>
+      <div style={styles.header}>
+        <h1 style={styles.h1}>🎨 Random AI Generated Image</h1>
+        <button style={styles.btn} onClick={generateImages}>
+          🔄 Get Another Image
+        </button>
+      </div>
+      
+      {loading ? (
+        <div style={styles.loading}>Loading images...</div>
+      ) : (
+        <div style={styles.gallery}>
+          {images.map((image, index) => (
+            <div key={index} style={styles.imageWrapper}>
+              <img src={image} alt={`Random AI Generated ${index}`} style={styles.img} />
+            </div>
+          ))}
         </div>
       )}
-      <br />
-      <button style={styles.btn} onClick={loadRandomImage}>
-        🔄 Get Another Image
-      </button>
     </div>
   )
 }
 
 const styles = {
-  container: {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
+  pageContainer: {
     minHeight: '100vh',
     background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
     fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-    padding: '20px',
+    padding: '40px 20px',
+  },
+  header: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    maxWidth: '1400px',
+    margin: '0 auto 40px',
+    gap: '20px',
   },
   h1: {
     color: 'white',
-    marginBottom: '30px',
     fontSize: '2.5em',
     textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)',
+    margin: 0,
+    flex: 1,
+    textAlign: 'center',
+  },
+  gallery: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+    gap: '20px',
+    maxWidth: '1400px',
+    margin: '0 auto',
   },
   imageWrapper: {
     position: 'relative',
-    display: 'inline-block',
     cursor: 'pointer',
     transition: 'transform 0.3s ease, box-shadow 0.3s ease',
     borderRadius: '15px',
     overflow: 'hidden',
     boxShadow: '0 10px 40px rgba(0, 0, 0, 0.3)',
+    aspectRatio: '3/2',
   },
   img: {
     display: 'block',
-    maxWidth: '100%',
-    height: 'auto',
+    width: '100%',
+    height: '100%',
+    objectFit: 'cover',
     borderRadius: '15px',
     transition: 'filter 0.3s ease',
   },
   btn: {
-    marginTop: '30px',
     padding: '12px 30px',
     fontSize: '1em',
     background: 'white',
@@ -88,11 +103,13 @@ const styles = {
     fontWeight: 'bold',
     transition: 'all 0.3s ease',
     boxShadow: '0 5px 15px rgba(0, 0, 0, 0.2)',
+    whiteSpace: 'nowrap',
   },
   loading: {
     color: 'white',
     fontSize: '1.2em',
-    marginBottom: '20px',
+    textAlign: 'center',
+    marginTop: '50px',
   },
 }
 
