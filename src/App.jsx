@@ -23,7 +23,8 @@ function App() {
     setLoading(false)
   }
 
-  const downloadImage = (image) => {
+  const handleImageClick = (image) => {
+    // Open the image in a new tab and trigger download
     const link = document.createElement('a')
     link.href = image.url
     link.download = `random-image-${image.id}.jpg`
@@ -51,14 +52,12 @@ function App() {
       ) : (
         <div style={styles.gallery}>
           {images.map((image, index) => (
-            <div key={image.id} style={styles.imageWrapper}>
+            <div 
+              key={image.id} 
+              style={styles.imageWrapper}
+              onClick={() => handleImageClick(image)}
+            >
               <img src={image.url} alt={`Random AI Generated ${index}`} style={styles.img} />
-              <button 
-                onClick={() => downloadImage(image)}
-                style={styles.downloadBtn}
-              >
-                ⬇️ Download
-              </button>
             </div>
           ))}
         </div>
@@ -70,7 +69,7 @@ function App() {
 const styles = {
   pageContainer: {
     minHeight: '100vh',
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    background: 'linear-gradient(135deg, #66eac2 0%, #75a24b 100%)',
     fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
     padding: '40px 20px',
   },
@@ -114,21 +113,7 @@ const styles = {
     borderRadius: '15px',
     transition: 'filter 0.3s ease',
   },
-  downloadBtn: {
-    position: 'absolute',
-    bottom: '10px',
-    right: '10px',
-    padding: '8px 12px',
-    fontSize: '0.9em',
-    background: 'white',
-    color: '#667eea',
-    border: 'none',
-    borderRadius: '8px',
-    cursor: 'pointer',
-    fontWeight: 'bold',
-    transition: 'all 0.3s ease',
-    boxShadow: '0 5px 15px rgba(0, 0, 0, 0.3)',
-  },
+
   btn: {
     padding: '12px 30px',
     fontSize: '1em',
