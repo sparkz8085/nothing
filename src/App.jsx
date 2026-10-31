@@ -1,150 +1,145 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import './App.css'
 
-function App() {
-  // Random AI Image Generator App
-  const [images, setImages] = useState([])
-  const [loading, setLoading] = useState(true)
+const SITES = [
+  'neal.fun', 'theuselessweb.com', 'pointerpointer.com',
+  'en.wikipedia.org/wiki/Special:Random', 'poki.com', 'crazygames.com',
+  'y8.com', 'miniclip.com', 'itch.io/games/free', 'skribbl.io',
+  'slither.io', 'agar.io', 'play2048.co', 'play.typeracer.com',
+  'monkeytype.com', 'geoguessr.com', 'radio.garden', 'windy.com',
+  'hackertyper.net', 'zoom.earth', 'sudoku.com', 'lichess.org',
+  'chess.com', 'nytimes.com/games/wordle/index.html',
+  'orteil.dashnet.org/cookieclicker', 'ncase.me', 'akinator.com',
+  'garticphone.com', 'jklm.fun', 'sporcle.com', 'quickdraw.withgoogle.com',
+  'experiments.withgoogle.com', 'artsandculture.google.com', 'archive.org',
+  'ted.com', 'atlasobscura.com', 'boredpanda.com', 'reddit.com/r/random',
+  'xkcd.com/random/comic', 'apod.nasa.gov', 'earthcam.com',
+  'openculture.com', 'gutenberg.org', 'mentalfloss.com', 'kahoot.it',
+  'freerice.com', 'thisworddoesnotexist.com', 'thispersondoesnotexist.com',
+  'boredbutton.com', 'lofi.cafe', 'asoftmurmur.com', 'mynoise.net',
+  'patatap.com', 'weavesilk.com', 'littlealchemy2.com', 'flightradar24.com',
+  'worldometers.info', 'ciechanow.ski', 'pudding.cool', 'mapcrunch.com',
+  'jigsawexplorer.com', 'howstuffworks.com',
+]
 
-  const generateImages = () => {
-    setLoading(true)
-    const newImages = []
-    for (let i = 0; i < 2; i++) {
-      const randomId = Math.floor(Math.random() * 10000)
-      const imageUrl = `https://picsum.photos/300/200?random=${randomId}`
-      const downloadLink = `${imageUrl}&download=true`
-      const imageLink = i === 0 ? 'https://tunnel1.dlproxy.uk/download/IYJPauiQJ5rc6KsONo7yK3BHstHSpi8WwOOHj1Tk1NbA_zVDqVgK2exWBr4huEnQbZu9gSXEvQpzVJ1Umo6fRljE0t1S-jLsbq5vL7e10kcNiJiN09dz9q2owM-n6oghSSrFqDZ3hYMiM-WCbZQdByO-TX5woz-h7ubhNHfEP_0pp0PeZp8ucdu3AweZpFf56ueFdjvVGTKoTBRz-M7ZKNc4CCcmGqo_vnOtxZOLSqPArlSjqgU_Sg-TnAA9XZF0z2wRdIcee7_M3t6RiJLOb2iQqvob40hRSPeNhAe4KWryxqXB0YYebgB4Bw0GJkLLWnCLxJP8pz7b4HMFli5EP2suC6XUDFHgcdZZq-j_wTj8vaVilQF2IFN4-Q04S2IXyDsjg3D8M7vnObCMX8a3hpVWUphUI_7Wtv9djxTrUd8e9J2F_UTQr9JBznhr8HSfAH24qlEhGbBVTPHoKZHS_g76qAirChSQxTDUo6tz-1AOvQOe-8IQHkT7bKAwut-18e2szJ_1OuPG00HnoKTQbzHvMOcECiGg2DvA6vmiRfLtZmVxcGdNxyxbpYBBoeMxsx6rqe0MlmCeJC0bpmAE2ktgIVypIUbZNDW78oLg11vmxva1EaG293c_w330G8Zk?sig=3QgG6RYlIo1piiFQUUGO3EpRMiarrUuD5Od_uM_RttE' : 'https://tunnel1.dlproxy.uk/download/WeS8LM3NotVPGgjmTsQltmUEeVfRNX8d1NAds14ag3E9wc1TSU_YgZEKM20HCgKYAnO_riGWDh7EB5VcUSuVz2Q-tC3qFC5jHInC-Mv3anxLU602HR0nhDlz0xsNxztXHQnPFTNW27XMnA8OxYRhBZCLaM_iOwO8GTWTkBQITKNzKlffST11vhw45LoF4qINcpXowjjbkxV5xyxjBof8GHw1nY6o9uJNYciEIIAy4maTrCwUOWYYTGlASf_pd1iBko5wObcucgQ59VKTugjJcQGJqjHRSxTkfsiyee-wnUARMr3g78dzYnNCHGqIC_lM4jhT0TYnSggn_ACIc93qFY8HCRTPtoP34-YIgDCdhgitVHJDBahhuBM3wxtmLeyvMPVOkprvDQbZLjbrm1PjMsnhxBdPGuqoKEi7hORUlyvEbhMHI6RKIHfRtlSbBuWVe_7RQ9TXvp-E3yjy_UYIznN6qlMVkRRJn9ufKkaN_KlJGgH_dEa1IlJzDDZnKhcnHcYHQ0hwyoVTxPcUKQDOsWrBaJaV8eEizV2Fir81IY-DQXm5DL48hsXdkE8qc3DZzS4-Rt_LQnzHYwXUeU7w73uA7U6l1IHnqGkrcJ500SLJ2I2NPrJBVj-HqFHiAoklp7zSJ5uVe6xtAox81a-KqQ?sig=cy_NsWvq0Aj2H7M2Uux1P0QKmZt-M3zEid9k8k3dviw'
-      newImages.push({
-        url: imageUrl,
-        downloadLink: downloadLink,
-        id: `${randomId}-${i}-${Date.now()}`,
-        serial: i + 1,
-        link: imageLink
-      })
-    }
-    setImages(newImages)
-    setLoading(false)
+const COUNT = 50
+const HEIGHTS = [400, 460, 520, 600]
+
+function shuffle(items) {
+  const result = [...items]
+  for (let i = result.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[result[i], result[j]] = [result[j], result[i]]
   }
-
-  const handleImageClick = (image) => {
-    // Open the link for the image
-    window.open(image.link, '_blank')
-  }
-
-  useEffect(() => {
-    generateImages()
-  }, [])
-
-  return (
-    <div style={styles.pageContainer}>
-      <div style={styles.header}>
-        <h1 style={styles.h1}>🎨 Random AI Generated Image</h1>
-        <button style={styles.btn} onClick={generateImages}>
-          🔄 Get Another Image
-        </button>
-      </div>
-      
-      {loading ? (
-        <div style={styles.loading}>Loading images...</div>
-      ) : (
-        <div style={styles.gallery}>
-          {images.map((image, index) => (
-            <div 
-              key={image.id} 
-              style={styles.imageWrapper}
-              onClick={() => handleImageClick(image)}
-            >
-              <div style={styles.serialNumber}>{image.serial}</div>
-              <img src={image.url} alt={`Random AI Generated ${index}`} style={styles.img} />
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  )
+  return result
 }
 
-const styles = {
-  pageContainer: {
-    minHeight: '100vh',
-    background: 'linear-gradient(135deg, #66eac2 0%, #75a24b 100%)',
-    fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-    padding: '40px 20px',
-  },
-  header: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    maxWidth: '1400px',
-    margin: '0 auto 40px',
-    gap: '20px',
-  },
-  h1: {
-    color: 'white',
-    fontSize: '2.5em',
-    textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)',
-    margin: 0,
-    flex: 1,
-    textAlign: 'center',
-  },
-  gallery: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
-    gap: '20px',
-    maxWidth: '1400px',
-    margin: '0 auto',
-  },
-  imageWrapper: {
-    position: 'relative',
-    cursor: 'pointer',
-    transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-    borderRadius: '15px',
-    overflow: 'hidden',
-    boxShadow: '0 10px 40px rgba(0, 0, 0, 0.3)',
-    aspectRatio: '3/2',
-  },
-  serialNumber: {
-    position: 'absolute',
-    top: '10px',
-    left: '10px',
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    color: 'white',
-    padding: '8px 12px',
-    borderRadius: '50%',
-    fontSize: '1.2em',
-    fontWeight: 'bold',
-    zIndex: 10,
-    minWidth: '30px',
-    textAlign: 'center',
-  },
-  img: {
-    display: 'block',
-    width: '100%',
-    height: '100%',
-    objectFit: 'cover',
-    borderRadius: '15px',
-    transition: 'filter 0.3s ease',
-  },
+function siteLabel(site) {
+  return site.split('/')[0].replace(/^www\./, '')
+}
 
-  btn: {
-    padding: '12px 30px',
-    fontSize: '1em',
-    background: 'white',
-    color: '#667eea',
-    border: 'none',
-    borderRadius: '25px',
-    cursor: 'pointer',
-    fontWeight: 'bold',
-    transition: 'all 0.3s ease',
-    boxShadow: '0 5px 15px rgba(0, 0, 0, 0.2)',
-    whiteSpace: 'nowrap',
-  },
-  loading: {
-    color: 'white',
-    fontSize: '1.2em',
-    textAlign: 'center',
-    marginTop: '50px',
-  },
+function makeBatch(previous = []) {
+  // Avoid repeating the immediately previous set whenever possible.
+  const pool = SITES.filter((site) => !previous.includes(site))
+  const candidates = pool.length >= COUNT ? pool : SITES
+  return shuffle(candidates).slice(0, COUNT).map((site, index) => ({
+    site,
+    id: `${Date.now()}-${index}-${Math.random().toString(36).slice(2)}`,
+    height: HEIGHTS[Math.floor(Math.random() * HEIGHTS.length)],
+  }))
+}
+
+function App() {
+  const [tiles, setTiles] = useState(() => makeBatch())
+  const [previousSites, setPreviousSites] = useState([])
+  const [failedImages, setFailedImages] = useState({})
+  const [batchNumber, setBatchNumber] = useState(1)
+
+  const shuffleTiles = () => {
+    const currentSites = tiles.map((tile) => tile.site)
+    setPreviousSites(currentSites)
+    setTiles(makeBatch(currentSites))
+    setFailedImages({})
+    setBatchNumber((number) => number + 1)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const siteCount = useMemo(() => SITES.length, [])
+
+  useEffect(() => {
+    const onKeyDown = (event) => {
+      if (event.key.toLowerCase() === 'r' && !['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) {
+        shuffleTiles()
+      }
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [tiles])
+
+  return (
+    <div className="app-shell">
+      <header className="page-header">
+        <div className="intro">
+          <p className="eyebrow">THE INTERNET IS YOUR PLAYGROUND</p>
+          <h1>Bored? Pick a photo.</h1>
+          <p className="subtitle">
+            50 random photos. 50 different rabbit holes. Click one and see where the internet takes you.
+          </p>
+        </div>
+        <div className="header-actions">
+          <span className="batch-count">SET {String(batchNumber).padStart(2, '0')}</span>
+          <button className="shuffle-button" id="shuffle" type="button" onClick={shuffleTiles}>
+            <span aria-hidden="true">↻</span> Shuffle 50 new photos
+          </button>
+        </div>
+      </header>
+
+      <main>
+        <div className="wall" id="wall" aria-label="Random websites gallery">
+          {tiles.map((tile, index) => {
+            const imageSeed = encodeURIComponent(tile.id)
+            const imageUrl = `https://picsum.photos/seed/${imageSeed}/400/${tile.height}`
+            return (
+              <a
+                className="tile"
+                href={`https://${tile.site}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`Open ${siteLabel(tile.site)} in a new tab`}
+                key={tile.id}
+              >
+                {failedImages[tile.id] ? (
+                  <div className="image-fallback" role="img" aria-label="Photo unavailable">
+                    <span aria-hidden="true">✳</span>
+                    <small>PHOTO UNAVAILABLE</small>
+                  </div>
+                ) : (
+                  <img
+                    loading={index < 8 ? 'eager' : 'lazy'}
+                    decoding="async"
+                    width="400"
+                    height={tile.height}
+                    alt={`Random photo ${index + 1}`}
+                    src={imageUrl}
+                    onError={() => setFailedImages((current) => ({ ...current, [tile.id]: true }))}
+                  />
+                )}
+                <span className="tile-caption">
+                  <small>{String(index + 1).padStart(2, '0')}</small>
+                  {siteLabel(tile.site)}
+                </span>
+              </a>
+            )
+          })}
+        </div>
+      </main>
+
+      <footer>
+        <p>Photos by <a href="https://picsum.photos/" target="_blank" rel="noopener noreferrer">Picsum</a>. Destinations open in a new tab.</p>
+        <p className="footer-note">{siteCount} destinations in the shuffle pool · Press <kbd>R</kbd> to shuffle</p>
+      </footer>
+    </div>
+  )
 }
 
 export default App
